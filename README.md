@@ -1,3 +1,11 @@
+Hi There, I am [Sonwabile Banca]
+
+I am a Software Developer and I am Passionate about Applied Mathematics especially computing mathematical models.
+##[Programming Languages]##
+-[Python]
+-[SQL]
+
+
 # SonwabileBanca.github.io
 # Data Scientist
 
