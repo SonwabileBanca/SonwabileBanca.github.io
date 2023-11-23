@@ -26,6 +26,15 @@ tasks_filename = 'tasks.txt'
 
 def login():
   # use global keyword to declare a global variable
+    '''  User Login
+         Call the login() function
+         Prompt the user to enter a username
+         Prompt the user to enter a password
+         Read stored user information from 'user.txt'
+         Check if the entered username and password match any stored user information
+         Set passUsername globally if login is successful
+         Handle FileNotFoundError if 'user.txt' is not found'''
+    
   global passUsername
 
   try:
@@ -60,6 +69,7 @@ def read_tasks_file():
         FileNotFoundError: If 'tasks.txt' is not found.
         Exception: If an error occurs while reading tasks.
     """
+    
   #
   tasks = []
   try:
