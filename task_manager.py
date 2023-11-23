@@ -1,119 +1,225 @@
-# Capstone project
-#Display
-display = '''Good Day Sir/Madam, This is the \033[034mTask Manager\033[0m
-Where we Assist you in managing your duties.'''
-print(display + '\n')
+#Working with files===================
+# Capstone project=================
+#Display========
+print('=============================================')
 
-#=====importing libraries===========
+print('=====Welcome to the task Manager ==========')
+print('=============================================')
+print('\n\n\n')
 
-from datetime import datetime
+import json
 
-current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-print('Current date:', current_date)
+passUsername = None
+tasks_filename = 'tasks.txt'
 
-#====Login Section====
+# Function to login
+"""
+    Perform user login.
 
-with open('user.txt', 'r') as f:
-  usernames = f.readlines()
-  
-  print(usernames)
+    Prompts the user for a username and password, checks against stored information
+    in the 'user.txt' file, and sets the global passUsername variable on successful login.
 
-usernames = [username.strip() for username in usernames]
-print('Usernames', usernames)
+    Raises:
+        FileNotFoundError: If 'user.txt' is not found.
+    """
 
-# Correct usernames and password
-correct_username = 'admin'
-correct_password = 'adm1n'
 
-# Validate and Inintaialise for user input
-username = input('Enter usename:')
-password = input('Enter password:')
-#While loop to check that username and password is correct
-while username != correct_username or password != correct_password:
-  print('Error: Invalid username or password')
-  username = input('Enter username\t')
-  password = input('Enter password\t')
-print('Login Completed!')
+def login():
+  # use global keyword to declare a global variable
+  global passUsername
 
-while True:
-  # presenting the menu to the user and
-  # making sure that the user input is coneverted to lower case.
-  menu = input('''Select one of the following Options below:
-r - Registering a user
-a - Adding a task
-va - View all tasks
-vm - view my task
-e - Exit
-: ''').lower()
-
-  if menu == 'r':
-    pass
-    new_username = input('Enter a new username:')
-    new_password = input('Enter new password:')
-    confirm_password = input('Confirm the password:')
-    if new_password == confirm_password:
-      # Open the file on apppend mode and add a new udername & Password
-      with open('user.txt', 'a') as f:
-        f.write(f'{new_username}:{new_password}\n')
-      print('The New user has been added succesfully')
-    else:
-      print('Password failed!, try again please.')
-
-  elif menu == 'a':
-    pass
-    # Prompt details about task specifics.
-    assigned_to = input('The person the task was assigned to:\n')
-    title_task = input('Enter the title of the task:')
-    task_description = input('Enter the description of task')
-    due_date = input('Enter the due Date of task:')
-    # Create a string to represent the task
-    task_entry = f'Assigned to: {assigned_to}\nTitle: {title_task}\nDiscription: {task_description}\nDue Date: {due_date}\nDate Created: {current_date}\nCompleted No\n'
-      
-    with open('tasks.txt', 'a') as f:
-      f.write(task_entry + '\n')
-    print('Task was added scuccesfully!')
-  elif menu == 'va':
-    pass
-    with open('tasks.txt', 'r') as f:
-      # Read a line from user.txt
-      line = f.readline()
-      value = line.strip().split(', ')
-      user_info = {'tasks': value[0],
-                  'Assigned to': value[1],
-                  'Date assigned': value[2],
-                  'Due date': value[3],
-                  'Tasks Complete?': value[4],
-                  'Task description': value[5]
-      }
-      # The information of the user
-      for key, value in user_info.items():
-        print(f'{key}:{value}')
-
-  elif menu == 'vm':
-    pass
-    with open('tasks.txt','r') as f:
-      line = f.readline()
-      value = line.strip().split(', ')
-    log_in_username = input('Enter your username:')
+  try:
+    # try to open the file
     with open('user.txt', 'r') as f:
-      line = f.readline()
-      # Strip the newline charachters
-      username, password = line.strip().split(',')
-      if username == log_in_username:
-        user_info = {'Tasks': value[0],
-                  'Assigned to': value[1],
-                  'Date assigned': value[2],
-                  'Due date': value[3],
-                  'Task Complete?': value[4],
-                  'Task description': value[5]
-                    }
-        print('Login Succesful!')
-      else:
-        print('Username not found unfortunately')
-        
-  elif menu == 'e':
-    print('Goodbye!!!')
-    exit()
+      # separate the username and password by a comma and space.
+      stored_info = [line.strip().split(', ') for line in f]
+      # A while true loop to ask for username and password
+      while True:
+        passUsername = input('Enter your username: ')
+        passPassword = input('Enter your password: ')
+        if [passUsername, passPassword] in stored_info:
+          print('Welcome back!')
+          break
+        else:
+          print('Incorrect username or password.')
+        # if the username and password is incorrect, the user will be asked to enter the username and password again
+# Raise an error if the file is not found
+  except FileNotFoundError:
+    print('No user found.')
 
-  else:
-    print("You have made a wrong choice, Please Try again")
+
+# A function that read a task
+def read_tasks_file():
+  """
+    Read tasks from the 'tasks.txt' file and return a list of tasks.
+
+    Returns:
+        list: A list of dictionaries representing tasks.
+
+    Raises:
+        FileNotFoundError: If 'tasks.txt' is not found.
+        Exception: If an error occurs while reading tasks.
+    """
+  #
+  tasks = []
+  try:
+    with open('tasks.txt', 'r') as f:
+      for line in f:
+        task_data = line.strip().split(', ')
+        if len(task_data) == 6:
+          # use a dictionary to store the task data
+          task = {
+              'Assigned_to': task_data[0],
+              'task_Title': task_data[1],
+              'task_Description': task_data[2],
+              'task_Due_Date': task_data[3],
+              'date_created': task_data[4],
+              'Complete': task_data[5]
+          }
+          tasks.append(task)
+    return tasks
+  except FileNotFoundError:
+    print(f"Error: File '{tasks_filename}' not found.")
+    return []
+  except Exception as e:
+    print(f"An error occurred while reading tasks: {e}")
+    return []
+
+
+# a function that displa the tasks
+def display_task(tasks):
+  """
+    Display information about tasks.
+
+    Args:
+        tasks (list): A list of dictionaries representing tasks.
+
+    Raises:
+        Exception: If an error occurs while displaying tasks.
+    """
+  try:
+    for task in tasks:
+      print(f'Task Title: {task["task_Title"]}')
+      print(f'Task Description: {task["task_Description"]}')
+      print(f'Task Due Date: {task["task_Due_Date"]}')
+      print(f'Date Created: {task["date_created"]}')
+      print(f'Complete: {task["Complete"]}')
+      print()
+  except Exception as e:
+    print(f"An error occurred: {e}")
+
+
+def main():
+  global passUsername, tasks_filename
+
+  print('=====Welcome to the task Manager =====')
+
+  login()
+  print(f'Logged in as {passUsername}\n')
+  # the Menu is a while true loop
+  while True:
+    print('Menu:')
+    print('r. Register a user')
+    print('a. Add a task')
+    print('va. View all tasks')
+    print('vm. View my tasks')
+    print('e. Exit')
+
+    choice = input('Enter your choice: ')
+
+    if choice == 'r':
+      try:
+        usernames = []
+
+        with open('user.txt', 'r') as f:
+          for line in f:
+            data = line.strip().split(', ')
+            if len(data) == 2:
+              usernames.append(data[0])
+            else:
+              print(f'Invalid data format in user.txt: {line}')
+
+        username = input('Enter a new username: ')
+        if username in usernames:
+          print('Username already exists.')
+          continue
+
+        password = input('Enter a new password: ')
+        with open('user.txt', 'a') as f:
+          f.write(f'{username}, {password}\n')
+          print('User registered successfully!')
+      except Exception as e:
+        print(f"An error occurred: {e}")
+
+    elif choice == 'a':
+      # Prompt user to enter task details
+      try:
+        tasks_detail = {
+            'Assigned_to':
+            passUsername,
+            'task_Title':
+            input('Enter the task title: '),
+            'task_Description':
+            input('Enter the task description: '),
+            'task_Due_Date':
+            input('Enter the task due date (YYYY-MM-DD): '),
+            'date_created':
+            input('Enter the date the task was created (YYYY-MM-DD): '),
+            'Complete':
+            input('Is the task complete? (y/n)').lower()
+        }
+        # Open the tasks file in append mode
+
+        with open('tasks.txt', 'a') as f:
+          # use the join method to join the tasks_detail dictionary with comma and space
+          tasks_detail_str = ', '.join(
+              str(value) for value in tasks_detail.values())
+          f.write(tasks_detail_str + '\n')
+          print('Task added successfully!')
+      except Exception as e:
+        print(f"An error occurred: {e}")
+
+    elif choice == 'va':
+      try:
+        tasks = read_tasks_file()
+        if not tasks:
+          print('No tasks available.')
+        else:
+          print('=====All Tasks=====')
+          print('\n')
+          display_task(tasks)
+          print('\n')
+          print('===================')
+      except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+# if use choose view task then it will display the tasks of the user that is logged on at the time
+# the first index in the txt file will show the name of the person resposible for task
+    elif choice == 'vm':
+      try:
+        tasks = read_tasks_file()
+        my_tasks = [
+            task for task in tasks if task['Assigned_to'] == passUsername
+        ]
+        if not my_tasks:
+          print(f'No tasks available for {passUsername}.')
+        else:
+          print(f'=====Tasks for {passUsername}=====')
+          print('\n')
+          display_task(my_tasks)
+          print('\n')
+          print('===================')
+      except Exception as e:
+        print(f"An error occurred: {e}")
+
+    elif choice == 'e':
+      print('Exiting the program. Goodbye!')
+      print('===================')
+      break
+
+    else:
+      print('Invalid choice. Please enter a valid option.')
+
+if __name__ == "__main__":
+  main()
