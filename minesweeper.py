@@ -1,10 +1,13 @@
+#=================Sonwabile Banca====================
+#============Using 2D list and For loops to replace the numbers with hash=============================
+#===============================================================
 # Minesweeper
 def count_adjacent_mines(grid, row, col):
     rows = len(grid)
     cols = len(grid[0])
     mine_count = 0
 
-    # Define the coordinates of adjacent elements
+    # ==========Define the coordinates of adjacent elements ===========================
     directions = [(-1, -1), (-1, 0), (-1, 1),
                   (0, -1),           (0, 1),
                   (1, -1), (1, 0), (1, 1)]
@@ -13,7 +16,7 @@ def count_adjacent_mines(grid, row, col):
         new_row = row + dr
         new_col = col + dc
 
-        # Check if the adjacent coordinates are within bounds
+        #=============== Check if the adjacent coordinates are within bounds==========================
         if 0 <= new_row < rows and 0 <= new_col < cols and grid[new_row][new_col] == '#':
             mine_count += 1
 
