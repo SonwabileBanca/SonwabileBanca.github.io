@@ -1,0 +1,316 @@
+// ExpressBank System 
+// ================================================================
+// 2. Construct the Node, LinkedList, and TreeNode classes
+// (Simplified -  For brevity,  the BST methods are not fully implemented)
+// My Node class
+class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+// If user wants linked lists
+class LinkedList {
+  constructor() {
+    this.head = null;
+  }
+
+  add(data) {
+    const newNode = new Node(data);
+    if (!this.head) {
+      this.head = newNode;
+      return;
+    }
+    let current = this.head;
+    while (current.next) {
+      current = current.next;
+    }
+    current.next = newNode;
+  }
+
+  find(accountNumber) {
+    let current = this.head;
+    while (current) {
+      if (current.data.accountNumber === accountNumber) {
+        return current;
+      }
+      current = current.next;
+    }
+    return null;
+  }
+//Added to help with debugging
+  toArray() { 
+    const result = [];
+    let current = this.head;
+    while (current) {
+      result.push(current.data);
+      current = current.next;
+    }
+    return result;
+  }
+}
+
+class TreeNode {
+  constructor(data) {
+    this.data = data;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+// My Bank Class
+class Bank {
+  constructor(useBST = false) {
+    this.useBST = useBST;
+    if (this.useBST) {
+      // Using null as root of the BST
+      this.accounts = null; 
+    } else {
+      this.accounts = new LinkedList();
+    }
+  }
+
+  // Method to add new accounts
+  _bstInsert(root, data) {
+    if (!root) {
+      return new TreeNode(data);
+    }
+
+    if (data.accountNumber < root.data.accountNumber) {
+      root.left = this._bstInsert(root.left, data);
+    } else if (data.accountNumber > root.data.accountNumber) {
+      root.right = this._bstInsert(root.right, data);
+    }
+    return root;
+  }
+
+  addAccount(accountNumber, initialBalance = 0) {
+    const accountData = { accountNumber, balance: initialBalance };
+    if (this.useBST) {
+      this.accounts = this._bstInsert(this.accounts, accountData); // Corrected line
+    } else {
+      this.accounts.add(accountData);
+    }
+  }
+
+  // Establish transfer and balance-check methods
+  _bstFind(root, accountNumber) {
+    if (!root) {
+      return null;
+    }
+    if (accountNumber === root.data.accountNumber) {
+      return root;
+    } else if (accountNumber < root.data.accountNumber) {
+      return this._bstFind(root.left, accountNumber);
+    } else {
+      return this._bstFind(root.right, accountNumber);
+    }
+  }
+
+  transfer(fromAccountNumber, toAccountNumber, amount) {
+    let fromAccount, toAccount;
+
+    if (this.useBST) {
+      fromAccount = this._bstFind(this.accounts, fromAccountNumber);
+      toAccount = this._bstFind(this.accounts, toAccountNumber);
+    } else {
+      fromAccount = this.accounts.find(fromAccountNumber);
+      toAccount = this.accounts.find(toAccountNumber);
+    }
+
+
+    if (!fromAccount) {
+      console.error(`Account ${fromAccountNumber} not found.`);
+      return false;
+    }
+    if (!toAccount) {
+      console.error(`Account ${toAccountNumber} not found.`);
+      return false;
+    }
+
+    if (fromAccount.data.balance >= amount && amount > 0) {
+      fromAccount.data.balance -= amount;
+      toAccount.data.balance += amount;
+      console.log(`Transferred $${amount} from ${fromAccountNumber} to ${toAccountNumber}.`);
+      return true;
+    } else if (amount <= 0) {
+      console.error("Transfer amount must be positive.");
+      return false;
+    } else {
+      console.error(`Insufficient funds in account ${fromAccountNumber}.`);
+      return false;
+    }
+  }
+
+  checkBalance(accountNumber) {
+    let account;
+    if (this.useBST) {
+      account = this._bstFind(this.accounts, accountNumber);
+    } else {
+      account = this.accounts.find(accountNumber);
+    }
+    if (!account) {
+      console.error(`Account ${accountNumber} not found.`);
+      return null;
+    }
+    return account.data.balance; //changed this line
+  }
+//Added to help with debugging
+  getAccounts() { 
+    if (this.useBST) {
+      // In-order traversal to get sorted account numbers
+      const result = [];
+      const _traverseInOrder = (node) => {
+        if (node) {
+          _traverseInOrder(node.left);
+          result.push(node.data);
+          _traverseInOrder(node.right);
+        }
+      };
+      // Start traversal from the root
+      _traverseInOrder(this.accounts);  
+      return result;
+
+    } else {
+      return this.accounts.toArray();
+    }
+  }
+
+  deposit(accountNumber, amount) {
+    let account;
+    if (this.useBST) {
+      account = this._bstFind(this.accounts, accountNumber);
+    } else {
+      account = this.accounts.find(accountNumber);
+    }
+
+    if (!account) {
+      console.error(`Account ${accountNumber} not found.`);
+      return false;
+    }
+    if (amount > 0) {
+      account.data.balance += amount;
+      console.log(`Deposited $${amount} into account ${accountNumber}.`);
+      return true;
+    } else {
+      console.error("Deposit amount must be positive.");
+      return false;
+    }
+  }
+
+  withdraw(accountNumber, amount) {
+    let account;
+    if (this.useBST) {
+      account = this._bstFind(this.accounts, accountNumber);
+    } else {
+      account = this.accounts.find(accountNumber);
+    }
+    if (!account) {
+      console.error(`Account ${accountNumber} not found.`);
+      return false;
+    }
+    if (amount > 0 && account.data.balance >= amount) {
+      account.data.balance -= amount;
+      console.log(`Withdrew $${amount} from account ${accountNumber}.`);
+      return true;
+    } else if (amount <= 0) {
+      console.error("Withdrawal amount must be positive.");
+      return false;
+    } else {
+      console.error(`Insufficient funds in account ${accountNumber}.`);
+      return false;
+    }
+  }
+
+  calculateInterest(accountNumber, rate) {
+    let account;
+     if (this.useBST) {
+      account = this._bstFind(this.accounts, accountNumber);
+    } else {
+      account = this.accounts.find(accountNumber);
+    }
+    if (!account) {
+      console.error(`Account ${accountNumber} not found.`);
+      return null;
+    }
+    if (rate > 0) {
+      const interest = account.data.balance * rate;
+      account.data.balance += interest;
+      console.log(`Interest of $${interest} added to account ${accountNumber}.`);
+      return interest;
+    } else {
+      console.error("Interest rate must be positive.");
+      return null;
+    }
+  }
+}
+
+// Expressbank: User Input Interaction
+// This is where the menu is.
+const prompt = require('prompt-sync')({ sigint: true }); // For getting user input
+
+function main() {
+  console.log("Welcome to the Bank Management System!");
+  const useBST = prompt("Use Binary Search Tree for accounts? (true/false): ").toLowerCase() === 'true';
+  const bank = new Bank(useBST);
+
+  while (true) {
+    console.log("\nChoose an action:");
+    console.log("1. Add Account");
+    console.log("2. Deposit");
+    console.log("3. Withdraw");
+    console.log("4. Transfer");
+    console.log("5. Check Balance");
+    console.log("6. Calculate Interest");
+    console.log("7. View Accounts (For Debugging)");
+    console.log("8. Exit");
+
+    const choice = parseInt(prompt("Enter your choice: "), 10);
+
+    switch (choice) {
+      case 1:
+        const accountNumber = parseInt(prompt("Enter account number: "), 10);
+        const initialBalance = parseFloat(prompt("Enter initial balance: "));
+        bank.addAccount(accountNumber, initialBalance);
+        break;
+      case 2:
+        const depositAccountNumber = parseInt(prompt("Enter account number to deposit into: "), 10);
+        const depositAmount = parseFloat(prompt("Enter deposit amount: "));
+        bank.deposit(depositAccountNumber, depositAmount);
+        break;
+      case 3:
+        const withdrawAccountNumber = parseInt(prompt("Enter account number to withdraw from: "), 10);
+        const withdrawAmount = parseFloat(prompt("Enter withdrawal amount: "));
+        bank.withdraw(withdrawAccountNumber, withdrawAmount);
+        break;
+      case 4:
+        const fromAccountNumber = parseInt(prompt("Enter account number to transfer from: "), 10);
+        const toAccountNumber = parseInt(prompt("Enter account number to transfer to: "), 10);
+        const transferAmount = parseFloat(prompt("Enter transfer amount: "));
+        bank.transfer(fromAccountNumber, toAccountNumber, transferAmount);
+        break;
+      case 5:
+        const balanceAccountNumber = parseInt(prompt("Enter account number to check balance: "), 10);
+        const balance = bank.checkBalance(balanceAccountNumber);
+        if (balance !== null) {
+          console.log(`Balance of account ${balanceAccountNumber}: $${balance}`);
+        }
+        break;
+      case 6:
+        const interestAccountNumber = parseInt(prompt("Enter account number to calculate interest for: "), 10);
+        const interestRate = parseFloat(prompt("Enter interest rate (e.g., 0.05 for 5%): "));
+        bank.calculateInterest(interestAccountNumber, interestRate);
+        break;
+      case 7:
+        console.log("Current Accounts:", bank.getAccounts());
+        break;
+      case 8:
+        console.log("Exiting Bank Management System.");
+        return;
+      default:
+        console.log("Invalid choice. Please try again.");
+    }
+  }
+}
+
+main();
